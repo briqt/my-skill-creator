@@ -60,6 +60,12 @@ description: Skill 跨平台脚本和配置/用户数据管理规范。当创建
 
 支持多环境（prod/uat/testing）。选择链：`--profile` 参数 > `SKILL_PROFILE` 环境变量 > config.json `active` 字段。
 
+Profile 加载成功后，脚本必须在 stderr 输出当前使用的 profile：
+```
+[profile: prod]
+```
+这样使用者和 agent 能立即确认查询的是哪个环境，避免"查错环境"的问题。
+
 ### 错误输出要求
 
 配置缺失或无效时，错误信息必须包含：
