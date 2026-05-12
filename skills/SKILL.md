@@ -28,10 +28,17 @@ description: Skill 跨平台脚本和配置/用户数据管理规范。当创建
 
 ### 运行时数据目录
 
+一个 skill 的所有有状态文件集中在一个目录下：
+
 ```
-~/.config/agent-skills/<skill-name>/config.json   # 用户真实配置（含密钥）
-~/.config/agent-skills/<skill-name>/              # 其他有状态文件（db、cache）
+~/.config/agent-skills/<skill-name>/
+├── config.json       # 用户真实配置（含密钥）
+├── data.sqlite3      # 数据库（如有）
+├── cache/            # 缓存（如有）
+└── ...               # 其他运行时产物
 ```
+
+不要在 home 下创建独立的隐藏目录（如 `~/.my-skill/`）。所有状态归到 `~/.config/agent-skills/<name>/` 下，卸载时清理一个目录即可。
 
 ### 源码中提交什么
 
