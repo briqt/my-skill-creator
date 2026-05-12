@@ -13,7 +13,7 @@ description: Skill 跨平台脚本和配置/用户数据管理规范。当创建
 
 | 语言 | 适用场景 | 依赖要求 |
 |------|---------|---------|
-| Node.js | HTTP 调用、JSON 处理、轻量逻辑 | 只用内置模块 + 全局 fetch，不 npm install |
+| Node.js | HTTP 调用、JSON 处理、轻量逻辑 | 优先使用内置模块 + 全局 fetch。如需外部依赖，在 package.json 或 requirements.txt 中声明 |
 | Python | 需要特定 SDK、数据处理 | 标注 requirements.txt，脚本内 auto-install |
 
 不用 bash/shell。不依赖 jq、curl 等系统命令。
