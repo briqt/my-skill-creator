@@ -3,9 +3,7 @@ name: my-skill-creator
 description: Skill 跨平台脚本和配置/用户数据管理规范。当创建新 skill 需要编写脚本（scripts/）或管理配置文件（config.json）时使用。作为官方 skill-creator 的补充——官方管内容设计和评估，本 skill 管脚本怎么写、配置怎么放、错误怎么提示。触发词：skill 配置规范、skill 脚本、config 管理、跨平台 skill、skill convention、新建 skill 脚本。
 ---
 
-# Skill 跨平台与配置管理规范
-
-补充官方 skill-creator 未覆盖的两个方面：脚本编写 + 配置/用户数据管理。
+# Skill 脚本与配置管理规范
 
 ## 脚本分级
 
