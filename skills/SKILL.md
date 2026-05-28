@@ -5,15 +5,21 @@ description: Skill 跨平台脚本和配置/用户数据管理规范。当创建
 
 # Skill 脚本与配置管理规范
 
-## 脚本分级
+## 项目结构
 
-根据复杂度选择合适的形式：
+`npx skills add` 会克隆仓库，找到所有含 SKILL.md 的目录，将该目录整体复制为安装后的 skill。据此选择结构：
+
+**纯 skill（轻脚本或纯指令）**：SKILL.md 在仓库根目录或 `skills/<name>/` 子目录下，安装后即为完整 skill。一个仓库可包含多个 skill。
+
+**独立 CLI + skill**：CLI 源码在仓库根目录，SKILL.md 放在 `skill/` 子目录中。安装时只复制 `skill/` 目录，CLI 源码不会被带入 agent skill 目录。用户通过 pipx/npm 从同一仓库安装 CLI。
+
+## 脚本分级
 
 **轻脚本**：逻辑简单、无复杂依赖的脚本直接放在 skill 的 `scripts/` 目录中，skill 触发时直接执行。使用 Node.js 或 Python，不用 bash/shell，不依赖系统命令。
 
 **独立 CLI 工具**：逻辑较重、有多个依赖、需要独立版本管理的工具，作为独立项目维护，通过 GitHub 仓库分发安装：
-- Python：pyproject.toml 声明 `[project.scripts]` 入口点，用户通过 `pipx install git+https://github.com/user/repo.git` 安装
-- Node.js：package.json 声明 `bin` 字段，用户通过 `npx github:user/repo` 执行或 `npm install -g github:user/repo` 安装
+- Python：pyproject.toml 声明 `[project.scripts]` 入口点，通过 `pipx install git+https://github.com/user/repo.git` 安装
+- Node.js：package.json 声明 `bin` 字段，通过 `npx github:user/repo` 执行或 `npm install -g github:user/repo` 安装
 
 SKILL.md 中写明安装命令，agent 发现命令不可用时自动安装。
 
