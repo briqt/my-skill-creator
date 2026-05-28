@@ -5,17 +5,24 @@ description: Skill 跨平台脚本和配置/用户数据管理规范。当创建
 
 # Skill 跨平台与配置管理规范
 
-补充官方 skill-creator 未覆盖的两个方面：跨平台脚本编写 + 配置/用户数据管理。
+补充官方 skill-creator 未覆盖的两个方面：脚本编写 + 配置/用户数据管理。
 
-## 跨平台脚本
+## 脚本分级
 
-脚本必须跨平台（macOS / Linux / Windows WSL）。使用 Node.js 或 Python，不用 bash/shell，不依赖系统命令。外部依赖在 package.json 或 requirements.txt 中声明。
+根据复杂度选择合适的形式：
 
-Python CLI 工具使用 pyproject.toml 声明 `[project.scripts]` 入口点，用户通过 `pipx install` 全局安装。不使用 `pip install` 到系统 Python。
+**轻脚本**：逻辑简单、无复杂依赖的脚本直接放在 skill 的 `scripts/` 目录中，skill 触发时直接执行。使用 Node.js 或 Python，不用 bash/shell，不依赖系统命令。
 
-脚本行为：
+**独立 CLI 工具**：逻辑较重、有多个依赖、需要独立版本管理的工具，作为独立项目维护，通过 GitHub 仓库分发安装：
+- Python：pyproject.toml 声明 `[project.scripts]` 入口点，用户通过 `pipx install git+https://github.com/user/repo.git` 安装
+- Node.js：package.json 声明 `bin` 字段，用户通过 `npx github:user/repo` 执行或 `npm install -g github:user/repo` 安装
+
+SKILL.md 中写明安装命令，agent 发现命令不可用时自动安装。
+
+## 脚本行为
+
 - stdout 输出结果，stderr 输出诊断信息和错误
-- 不使用环境变量传递参数——所有输入通过 CLI 参数或配置文件获取，显式可见
+- 不使用环境变量传递参数——所有输入通过 CLI 参数或配置文件获取
 - 配置无效时 exit 1 + stderr 输出可直接执行的修复命令（完整路径）
 - 不做交互式输入
 - 每次运行无状态
