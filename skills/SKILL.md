@@ -11,6 +11,8 @@ description: Skill 跨平台脚本和配置/用户数据管理规范。当创建
 
 脚本必须跨平台（macOS / Linux / Windows WSL）。使用 Node.js 或 Python，不用 bash/shell，不依赖系统命令。外部依赖在 package.json 或 requirements.txt 中声明。
 
+Python CLI 工具使用 pyproject.toml 声明 `[project.scripts]` 入口点，用户通过 `pipx install` 全局安装。不使用 `pip install` 到系统 Python。
+
 脚本行为：
 - stdout 输出结果，stderr 输出诊断信息和错误
 - 不使用环境变量传递参数——所有输入通过 CLI 参数或配置文件获取，显式可见
