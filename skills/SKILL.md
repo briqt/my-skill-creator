@@ -19,7 +19,8 @@ description: Skill 跨平台脚本和配置/用户数据管理规范。当创建
 
 **独立 CLI 工具**：逻辑较重、有多个依赖、需要独立版本管理的工具，作为独立项目维护，通过 GitHub 仓库分发安装：
 - Python：pyproject.toml 声明 `[project.scripts]` 入口点，通过 `pipx install git+https://github.com/user/repo.git` 安装
-- Node.js：package.json 声明 `bin` 字段，通过 `npx github:user/repo` 执行或 `npm install -g github:user/repo` 安装
+- Node.js（纯 JS）：package.json 声明 `bin` 字段，通过 `npx github:user/repo` 执行或 `npm install -g github:user/repo` 安装
+- Node.js（TypeScript）：同上，但 `bin` 指向 `dist/` 下的编译产物，`dist/` 保持在 `.gitignore`。package.json 的 `scripts.prepare` 设为编译命令（如 `"prepare": "npm run build"`），npm 从 git URL 安装时会自动安装 devDependencies 并执行 `prepare` 完成编译。不需要 npm publish。
 
 SKILL.md 中写明安装命令，agent 发现命令不可用时自动安装。
 
