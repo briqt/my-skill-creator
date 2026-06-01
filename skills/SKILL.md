@@ -19,8 +19,8 @@ description: Skill 跨平台脚本和配置/用户数据管理规范。当创建
 
 **独立 CLI 工具**：逻辑较重、有多个依赖、需要独立版本管理的工具，作为独立项目维护，通过 GitHub 仓库分发安装：
 - Python：pyproject.toml 声明 `[project.scripts]` 入口点，通过 `pipx install git+https://github.com/user/repo.git` 安装
-- Node.js（纯 JS）：package.json 声明 `bin` 字段，通过 `npm install -g github:user/repo` 安装
-- Node.js（TypeScript）：`bin` 指向 `dist/` 下的编译产物，`dist/` **提交到仓库**（不放 `.gitignore`）。不使用 `prepare` 脚本——npm 11.x 对 git 依赖的全局安装存在 bug（symlink 指向已清理的临时目录 + prepare 执行时依赖未就绪）。开发者本地修改源码后手动 `npm run build` 再提交。安装命令：`npm i -g github:user/repo`。不需要 npm publish。
+- Node.js（纯 JS）：package.json 声明 `bin` 字段，通过 `npm i -g github:user/repo --install-links` 安装
+- Node.js（TypeScript）：`bin` 指向 `dist/` 下的编译产物，`dist/` **提交到仓库**（不放 `.gitignore`）。不使用 `prepare` 脚本——npm 10.x/11.x 对 git 依赖的全局安装有两个问题：(1) `install-links` 默认 `false`，导致 symlink 指向已清理的临时目录；(2) `prepare` 执行时依赖未安装到编译目录。开发者本地修改源码后手动 `npm run build` 再提交。安装命令：`npm i -g github:user/repo --install-links`。不需要 npm publish。
 
 SKILL.md 中写明安装命令，agent 发现命令不可用时自动安装。
 
