@@ -9,22 +9,21 @@ description: Skill 跨平台脚本和配置/用户数据管理规范。当创建
 
 `npx skills add` 会克隆仓库，找到所有含 SKILL.md 的目录，将该目录整体复制为安装后的 skill。
 
-**重要**：SKILL.md 不要放在仓库根目录。根目录的 SKILL.md 会触发 skills CLI 的单文件快捷路径 bug（`skill.path === tempDir` 时只安装 SKILL.md，丢失 scripts/ 等附属文件）。统一使用 `skills/<name>/` 子目录结构。
+**重要**：SKILL.md 不要放在仓库根目录。根目录的 SKILL.md 会触发 skills CLI 的单文件快捷路径 bug（`skill.path === tempDir` 时只安装 SKILL.md，丢失 scripts/ 等附属文件）。统一使用 `skills/` 子目录结构。
 
-**单 skill 仓库**：`skills/<skill-name>/SKILL.md`，附属文件（scripts/、references/）放在同级。
+**单 skill 仓库**：SKILL.md 和附属文件直接放在 `skills/` 下。
 
 ```
 repo/
 ├── skills/
-│   └── my-skill/
-│       ├── SKILL.md
-│       ├── scripts/
-│       └── references/
+│   ├── SKILL.md
+│   ├── scripts/
+│   └── references/
 ├── README.md
 └── ...
 ```
 
-**多 skill 仓库**：每个 skill 各占一个子目录。
+**多 skill 仓库**：每个 skill 各占 `skills/<name>/` 子目录。
 
 ```
 repo/
@@ -38,7 +37,7 @@ repo/
 └── ...
 ```
 
-**独立 CLI + skill**：CLI 源码在仓库根目录，SKILL.md 放在 `skills/<name>/` 子目录中。安装时只复制该子目录，CLI 源码不会被带入 agent skill 目录。用户通过 pipx/npm 从同一仓库安装 CLI。
+**独立 CLI + skill**：CLI 源码在仓库根目录，SKILL.md 放在 `skills/` 子目录中。安装时只复制该子目录，CLI 源码不会被带入 agent skill 目录。用户通过 pipx/npm 从同一仓库安装 CLI。
 
 ## 脚本分级
 
