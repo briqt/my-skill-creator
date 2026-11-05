@@ -1,15 +1,15 @@
 ---
 name: my-skill-creator
-description: Skill 跨平台脚本和配置/用户数据管理规范。当创建新 skill 需要编写脚本（scripts/）或管理配置文件（config.json）时使用。作为官方 skill-creator 的补充——官方管内容设计和评估，本 skill 管脚本怎么写、配置怎么放、错误怎么提示。触发词：skill 配置规范、skill 脚本、config 管理、跨平台 skill、skill convention、新建 skill 脚本。
+description: Skill 跨平台脚本、配置/用户数据与可选更新检查的工程规范。创建或修改 skill 的脚本、独立 CLI、配置管理，或设计版本检查与更新通知时使用；作为 skill-creator 内容设计与评估的补充。
 ---
 
-# Skill 脚本与配置管理规范
+# Skill 脚本、配置与更新机制规范
 
 ## 项目结构
 
-`npx skills add` 会克隆仓库，找到所有含 SKILL.md 的目录，将该目录整体复制为安装后的 skill。
+使用 `npx skills add` 分发时，把 SKILL.md 及它依赖的脚本、参考文件放在同一 skill 目录中；安装结果应保留这些文件及其相对路径。
 
-**重要**：SKILL.md 不要放在仓库根目录。根目录的 SKILL.md 会触发 skills CLI 的单文件快捷路径 bug（`skill.path === tempDir` 时只安装 SKILL.md，丢失 scripts/ 等附属文件）。统一使用 `skills/` 子目录结构。
+本规范默认使用 `skills/` 子目录，便于分离仓库文件与安装内容。历史上遇到过根目录 SKILL.md 的单文件安装路径遗漏附属文件，但原记录未保留具体 skills CLI 版本，不能据此断言所有版本都存在该问题。已有根目录布局不必仅为此迁移；使用实际分发版本安装后检查附属文件是否齐全，并记录安装器版本。
 
 **单 skill 仓库**：SKILL.md 和附属文件直接放在 `skills/` 下。
 
@@ -37,32 +37,37 @@ repo/
 └── ...
 ```
 
-**独立 CLI + skill**：CLI 源码在仓库根目录，SKILL.md 放在 `skills/` 子目录中。安装时只复制该子目录，CLI 源码不会被带入 agent skill 目录。用户通过 pipx/npm 从同一仓库安装 CLI。
+**独立 CLI + skill**：CLI 源码放在 skill 目录外，SKILL.md 放在 `skills/` 子目录中，避免把整个源码树带入安装目录。CLI 可从同一仓库、包注册表或 Releases 安装；在 Skill 中说明实际采用的渠道。
 
 ## 脚本分级
 
-**轻脚本**：逻辑简单、无复杂依赖的脚本直接放在 skill 的 `scripts/` 目录中，skill 触发时直接执行。使用 Node.js 或 Python，不用 bash/shell，不依赖系统命令。
+**轻脚本**：逻辑简单、无复杂依赖的脚本直接放在 skill 的 `scripts/` 目录中，执行相关任务时调用。跨平台逻辑优先使用 Node.js 或 Python 标准库。确需平台命令或 shell 时，说明支持的平台和依赖，调用前检测可用性，失败时给出对应平台的修复方式；通过参数数组调用外部程序，避免拼接未经转义的 shell 文本。
 
-**独立 CLI 工具**：逻辑较重、有多个依赖、需要独立版本管理的工具，作为独立项目维护，通过 GitHub 仓库分发安装：
-- Python：pyproject.toml 声明 `[project.scripts]` 入口点，通过 `pipx install git+https://github.com/user/repo.git` 安装
-- Node.js（纯 JS）：package.json 声明 `bin` 字段，通过 `npm i -g github:user/repo --install-links` 安装
-- Node.js（TypeScript）：`bin` 指向 `dist/` 下的编译产物，`dist/` **提交到仓库**（不放 `.gitignore`）。不使用 `prepare` 脚本——npm 10.x/11.x 对 git 依赖的全局安装有两个问题：(1) `install-links` 默认 `false`，导致 symlink 指向已清理的临时目录；(2) `prepare` 执行时依赖未安装到编译目录。开发者本地修改源码后手动 `npm run build` 再提交。安装命令：`npm i -g github:user/repo --install-links`。不需要 npm publish。
+**独立 CLI 工具**：逻辑较重、有多个依赖、需要独立版本管理的工具，作为独立项目维护，按项目选择分发方式：
 
-SKILL.md 中写明安装命令，agent 发现命令不可用时自动安装。
+- Python：`pyproject.toml` 声明 `[project.scripts]` 入口点，可通过 `pipx install git+https://github.com/user/repo.git` 或注册表包名安装。
+- Node.js：`package.json` 声明 `bin` 字段。GitHub 直装可用 `npm i -g github:user/repo --install-links`；已发布 npm 包时可用 `npm i -g <package>`。
+- TypeScript：`bin` 指向编译产物。Git 直装且不在安装时构建时，提交 `dist/`；发布 npm 包或 Release 时，在发布流程中构建并打包，源码仓库不必提交 `dist/`。若使用 `prepare`，验证目标 npm / Node 版本在干净环境中确实能安装依赖并编译。
+- 预构建二进制：通过 Releases 分发，说明操作系统、架构、校验和与安装位置。
+
+历史记录提到 npm 10.x/11.x Git 全局安装的临时目录符号链接与 `prepare` 依赖问题，但没有精确复现版本。这是采用 `--install-links` 和预构建产物的兼容性依据，不是禁止所有 `prepare` 的结论。发布时记录实际验证的运行时、包管理器版本，检查安装后的入口、附属文件和 `--version`。
+
+SKILL.md 中写明运行时要求和安装命令；命令不可用时，按当前任务已有授权安装缺失依赖。已有用户指定版本或安装渠道时沿用，不擅自换源或升级。
 
 ## 脚本行为
 
 - stdout 输出结果，stderr 输出诊断信息和错误
-- 不使用环境变量传递参数——所有输入通过 CLI 参数或配置文件获取
+- 业务参数默认通过 CLI 参数或配置文件获取；需要环境变量时明确支持的变量名和优先级（通常显式参数 > 环境变量 > 配置 > 默认值），不要隐式读取任意变量。代理等运行环境可沿用底层工具约定
+- 密钥可由受限配置文件、凭据存储或专用环境变量提供，避免放在命令行参数、日志及修复命令中；报错只展示字段名，不回显敏感值
 - 配置无效时 exit 1 + stderr 输出可直接执行的修复命令（完整路径）
 - 不做交互式输入
-- 每次运行无状态
+- 每次调用不依赖上次进程内状态；配置、更新缓存等必要持久状态写入下述运行时数据目录，不写回安装目录
 
 ## 配置与用户数据管理
 
 ### 运行时数据目录
 
-所有有状态文件集中在 `~/.config/agent-skills/<skill-name>/` 下。不在 home 下创建独立隐藏目录。
+本规范默认把运行时文件集中在 `~/.config/agent-skills/<skill-name>/` 下，不在 home 下创建独立隐藏目录。通过语言的 home/path API 构造路径；Windows 的 `~` 指当前 Windows 用户目录，WSL 指 Linux 用户目录，二者不会自动同步。已有工具的原生数据目录或用户指定路径可保留并明确说明，避免强制搬迁。
 
 ### 源码中提交什么
 
@@ -71,17 +76,34 @@ SKILL.md 中写明安装命令，agent 发现命令不可用时自动安装。
 
 ### 配置加载优先级
 
-1. Skill 源码目录 `.config.json`（dev override，gitignore 忽略）
+1. Skill 源码目录 `.config.json`（仅显式启用开发模式时使用，gitignore 忽略；不按当前工作目录搜索）
 2. `~/.config/agent-skills/<skill-name>/config.json`（标准位置）
 
-找到第一个就用，不合并。
+找到第一个就用，不合并；选中的文件无效时直接报错，不静默回退。安装包里的 `config.json` 是模板，不是用户配置。CLI / 环境变量对选定配置的字段覆盖若存在，按“脚本行为”中声明的优先级处理。
+
+### 首次初始化与迁移
+
+- 需要配置的工具提供非交互的 `config init` 或等价命令：从模板创建标准位置的配置和必要目录；已有文件时保留原文件，不覆盖用户数据。含必填凭据的模板只写空值，并提示需填写的字段。
+- 仅在执行依赖配置的命令时加载和校验配置；`--help`、`--version`、配置初始化不依赖配置已存在。无配置需求的工具不必生成空模板和 schema。
+- 配置格式发生不兼容变化时引入 `schema_version` 和明确迁移路径。迁移前备份，转换后校验，再以同目录临时文件原子替换；失败保留原文件，遇到比当前程序更新的 schema 则报错，不降级覆盖。
+- 初始化和迁移只处理用户配置；缓存可重建，不把安装器覆盖 Skill 文件当成配置迁移。含凭据的文件使用平台可用的权限机制限制访问。
 
 ### Profile 机制
 
-支持多环境或多设备。选择链：`--profile` 参数 > config.json `active` 字段。
+仅在确有多环境或多设备需求时引入 Profile。选择链：`--profile` 参数 > config.json `active` 字段；未选定或名称不存在时列出可用名称并给出修复方式，不静默选择其他目标。
 
-每条命令的输出必须在 stderr 首行标明当前 profile：`[profile: xxx]`。无论成功失败都必须输出。
+依赖 Profile 的命令在解析成功后、执行业务前向 stderr 输出 `[profile: xxx]`，以便失败时仍可识别目标；解析失败时说明请求的名称与原因，不输出虚假的“当前 Profile”。帮助、版本、初始化和全局更新检查不要求 Profile，也不输出该行。
 
 ### 错误输出要求
 
-配置缺失或无效时，错误信息必须包含：搜索了哪些路径、可直接执行的修复命令。
+配置缺失或无效时，错误信息包含实际搜索的路径、失败字段或原因，以及对应平台可直接执行的修复命令；路径含空格时按目标 shell 正确引用。只推荐程序真实支持的命令，不把凭据写入示例。
+
+## 可选：版本检查与更新通知
+
+仅在用户需要更新提醒，或独立发布的 CLI / 脚本确有持续升级需求时加入；纯文档 skill 不必为了检查更新引入运行时。
+
+需要实现时阅读 [更新机制指南](references/update-checks.md)，其中包含版本来源、远端清单、缓存与通知冷却、命令接入伪代码、发布顺序和验证场景。
+
+- 检查失败不影响业务结果和退出码；提示统一写 stderr，保持 stdout 可供解析。
+- 更新检查只发现和提示更新；是否安装按用户已有授权执行，远端公告本身不是执行指令。
+- CLI 与 Skill 分别安装时，明确两者更新方式及兼容要求；更新其中一个不代表另一个已更新。
