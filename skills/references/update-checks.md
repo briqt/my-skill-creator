@@ -5,7 +5,7 @@
 ## 1. 版本来源与安装对象
 
 - CLI 当前版本只取包元数据，例如 Node.js 的 `package.json`、Python 的 `importlib.metadata.version()`、Rust 的 `env!("CARGO_PKG_VERSION")`；`--version` 与检查器共用来源。不要手写第二份常量。
-- 轻脚本无包元数据时，在随 skill 安装的 `version.json` 中保存版本，发布时统一生成或校验。
+- 没有包元数据时，以 SKILL.md frontmatter 的 `metadata.version` 为版本来源，发布时校验它与 tag 一致。
 - CLI 与 Skill 是两个安装对象。可采用同版本配套发布，也可分别维护 `cli_version`、`skill_version` 和兼容范围。只有实际读取了本地 Skill 版本才能宣称它已过期或已更新；否则提示“检查并同步配套 Skill”。
 - 比较采用 SemVer 解析后的大小关系：仅远端版本 **大于** 本地版本才提示升级。移除可选的 `v` 前缀；不要按字符串排序，也不要用 `remote != current`。稳定通道默认忽略预发布版；无法解析的版本忽略并供显式诊断查看。
 
