@@ -2,7 +2,7 @@
 name: my-skill-creator
 description: Skill 的工程规范：面向 agent 的调用接口与输出、SKILL.md 的组织、脚本与独立 CLI 的分层、配置与用户数据、分发结构、版本与更新。创建或修改 skill 及其附带工具、设计它们的输入输出与配置、或调整文档结构与发布方式时使用；与 skill-creator 的内容设计与评估互补。
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Skill 工程规范
@@ -69,7 +69,7 @@ Skill 和它附带的工具主要由 agent 调用。agent 写下的每条命令�
 
 - 每个 skill 都有版本号，纯文档 skill 也不例外。每个版本号只在一处维护：工具以包元数据为准，Skill 以 SKILL.md frontmatter 的 `metadata.version` 为准。两者同版本发布时，用测试校验它们一致，不手工维护多份。
 - 每次发布都写 `CHANGELOG.md`，打与版本号一致的 tag。发布后用实际的分发渠道安装，核验版本号和附属文件。
-- SKILL.md 写明 skill 自身的更新命令。Skill 和 CLI 分开安装时，写明两者各自的更新方式和兼容要求；更新其中一个不代表另一个也已更新。
+- SKILL.md 写明 skill 自身的更新命令。Skill 和 CLI 分开安装时，写明两者各自的更新方式和兼容要求；更新其中一个不代表另一个也已更新。CLI 支持多种安装渠道时，按渠道分别给出实测可靠的升级方式。
 
 ### 可选：更新检查与通知
 
