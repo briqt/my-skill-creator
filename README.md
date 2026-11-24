@@ -30,3 +30,11 @@ npx skills add briqt/my-skill-creator -g -y
 - **为什么纯文档 skill 也要版本号。** 没有版本号，用户和 agent 无法判断装的是哪一版、两次安装之间改了什么；变更记录和 tag 让每次发布可追溯。
 - **为什么更新检查统一用 `notice.json`。** 它除了最新版本，还能承载独立的公告；读取的是静态文件，不受 GitHub API 未认证调用的频率限制；所有工具共用同一种实现和发布顺序，维护成本最低。
 - **为什么 Node.js 从 Git 安装要加 `--install-links` 并提交编译产物。** 曾记录到 npm 10.x/11.x 全局安装 Git 依赖时，临时目录的符号链接和 `prepare` 依赖有问题，但没有精确复现版本。所以这只是兼容性上的依据，不代表禁止使用 `prepare`。
+
+## 社区
+
+[学 AI，上 Linux DO](https://linux.do/)
+
+## 许可证
+
+[MIT](LICENSE)
